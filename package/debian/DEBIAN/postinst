@@ -1,0 +1,31 @@
+#!/bin/sh
+set -e
+
+if [ "$1" = "configure" ]
+then
+  groupadd -r thingsplex || true
+  groupadd -r bose || true
+
+  useradd -r -N -M -d / -s /bin/false -g thingsplex bose || true
+
+  chown -R bose:thingsplex /var/log/thingsplex/bose/ || true
+  chown -R bose:bose /opt/thingsplex/bose/ || true
+fi
+
+deb-systemd-helper unmask bose.service >/dev/null || true
+
+if deb-systemd-helper --quiet was-enabled bose.service; then
+  systemctl enable bose.service || true
+else
+  deb-systemd-helper update-state bose.service >/dev/null || true
+fi
+
+if [ -d /run/systemd/system ]; then
+  systemctl --system daemon-reload >/dev/null || true
+
+  if [ -n "$2" ]; then
+    deb-systemd-invoke try-restart bose.service >/dev/null || true
+  else
+    deb-systemd-invoke start bose.service >/dev/null || true
+  fi
+fi

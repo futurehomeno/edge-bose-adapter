@@ -1,0 +1,14 @@
+[Unit]
+Description=bose
+
+[Service]
+Type=simple
+ExecStart=/opt/thingsplex/bose/bose
+User=bose
+WorkingDirectory=/opt/thingsplex/bose
+Restart=always
+StandardOutput=null
+StandardError=null
+
+[Install]
+WantedBy=multi-user.target

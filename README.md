@@ -1,0 +1,2 @@
+### Futurehome Bose adapter
+unfinished
