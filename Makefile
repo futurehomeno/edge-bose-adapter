@@ -5,7 +5,7 @@ arch="armhf"
 remote_host = "fh@cube.local"
 
 clean:
-	-rm bose
+	-rm -f ./src/bose
 
 build-go:
 	cd ./src;go build -o bose service.go;cd ../

@@ -26,6 +26,7 @@ type FromFimpRouter struct {
 	client       *bose.Client
 	pb           *handler.Playback
 	vol          *handler.Volume
+	mute         *handler.Mute
 }
 
 func NewFromFimpRouter(mqt *fimpgo.MqttTransport, appLifecycle *edgeapp.Lifecycle, configs *model.Configs, states *model.States) *FromFimpRouter {
@@ -89,6 +90,9 @@ func (fc *FromFimpRouter) routeFimpMessage(newMsg *fimpgo.Message) {
 					}
 					log.Info("Trying to wake device...")
 					time.Sleep(time.Second * 1)
+					if i == 10 {
+						log.Error("Could not wake device. Please try again.")
+					}
 				}
 			}
 
@@ -117,6 +121,9 @@ func (fc *FromFimpRouter) routeFimpMessage(newMsg *fimpgo.Message) {
 						}
 						log.Info("Trying to execute command...")
 						time.Sleep(time.Second * 1)
+						if i == 10 {
+							log.Error("Could not execute command. Please try again.")
+						}
 					}
 					_, err := fc.pb.PlaybackSet(val, deviceIP, "8090")
 					if err != nil {
@@ -141,6 +148,76 @@ func (fc *FromFimpRouter) routeFimpMessage(newMsg *fimpgo.Message) {
 				fc.mqt.Publish(adr, msg)
 			}
 
+		case "cmd.playbackmode.set":
+			val, err := newMsg.Payload.GetBoolMapValue()
+			if err != nil {
+				log.Error("playbackmode error")
+			}
+			deviceIP, err := handler.GetIPFromID(addr, fc.states.Player)
+			if err != nil {
+				log.Error(err)
+			}
+			fc.states.NowPlaying, err = fc.client.GetNowPlaying(deviceIP, "8090")
+			if err != nil {
+				log.Error(err)
+			}
+			if fc.states.NowPlaying.Source == "STANDBY" {
+				_, err := fc.pb.WakeUp(deviceIP, "8090")
+				if err != nil {
+					log.Error(err)
+				}
+				for i := 0; i < 10; i++ {
+					fc.states.NowPlaying, err = fc.client.GetNowPlaying(deviceIP, "8090")
+					if err == nil && fc.states.NowPlaying.Source != "STANDBY" && fc.states.NowPlaying.Source != "LOCAL" {
+						break
+					}
+					log.Info("Trying to wake device...")
+					time.Sleep(time.Second * 1)
+					if i == 10 {
+						log.Error("Could not wake device. Pleqase try again.")
+					}
+				}
+			}
+
+			success, err := fc.pb.ModeSet(val, deviceIP, "8090")
+			if err != nil {
+				log.Error(err)
+			}
+			if success {
+
+				time.Sleep(time.Second * 1)
+				fc.states.NowPlaying, err = fc.client.GetNowPlaying(deviceIP, "8090")
+				if err != nil {
+					log.Error(err)
+				}
+				var shuffle bool
+				var repeatOne bool
+				var repeat bool
+				if fc.states.NowPlaying.ShuffleSetting == "SHUFFLE_OFF" {
+					shuffle = false
+				} else if fc.states.NowPlaying.ShuffleSetting == "SHUFFLE_ON" {
+					shuffle = true
+				}
+				if fc.states.NowPlaying.RepeatSetting == "REPEAT_OFF" {
+					repeatOne = false
+					repeat = false
+				} else if fc.states.NowPlaying.RepeatSetting == "REPEAT_ONE" {
+					repeatOne = true
+					repeat = false
+				} else if fc.states.NowPlaying.RepeatSetting == "REPEAT_ALL" {
+					repeatOne = false
+					repeat = true
+				}
+				val := map[string]bool{
+					"shuffle":    shuffle,
+					"repeat_one": repeatOne,
+					"repeat":     repeat,
+				}
+				adr := &fimpgo.Address{MsgType: fimpgo.MsgTypeEvt, ResourceType: fimpgo.ResourceTypeDevice, ResourceName: model.ServiceName, ResourceAddress: "1", ServiceName: "media_player", ServiceAddress: addr}
+				msg := fimpgo.NewMessage("evt.playbackmode.report", "media_player", fimpgo.VTypeBoolMap, val, nil, nil, newMsg.Payload)
+				fc.mqt.Publish(adr, msg)
+			}
+
 		case "cmd.volume.set":
 			deviceIP, err := handler.GetIPFromID(addr, fc.states.Player)
 			if err != nil {
@@ -158,7 +235,7 @@ func (fc *FromFimpRouter) routeFimpMessage(newMsg *fimpgo.Message) {
 				log.Error(err)
 			}
 			if success {
-				time.Sleep(time.Second * 1)
+				time.Sleep(time.Second * (1 / 2))
 				fc.states.Volume, err = fc.client.GetVolume(deviceIP, "8090")
 				if err != nil {
 					log.Error(err)
@@ -168,23 +245,26 @@ func (fc *FromFimpRouter) routeFimpMessage(newMsg *fimpgo.Message) {
 				fc.mqt.Publish(adr, msg)
 			}
 
-		// case "cmd.mode.set":
-		// 	deviceIP, err := handler.GetIPFromID(addr, fc.states.Player)
-		// 	if err != nil {
-		// 		log.Error(err)
-		// 	}
+		case "cmd.mute.set":
+			deviceIP, err := handler.GetIPFromID(addr, fc.states.Player)
+			if err != nil {
+				log.Error(err)
+			}
 
-		// 	// get str_map including bool values of repeat, repeatOne, crossfade and shuffle
-		// 	val, err := newMsg.Payload.GetStrMapValue()
-		// 	if err != nil {
-		// 		log.Error("Set mode error")
-		// 	}
-
-		// 	success, err := fc.pb.ModeSet(val, deviceIP, "8090")
-		// 	if err != nil {
-		// 		log.Error(err)
-		// 	}
-		// 	pbStatus, err := fc.client.Get
+			success, err := fc.mute.MuteSet(deviceIP, "8090")
+			if err != nil {
+				log.Error(err)
+			}
+			if success {
+				time.Sleep(time.Second * (1 / 2))
+				fc.states.Volume, err = fc.client.GetVolume(deviceIP, "8090")
+				if err != nil {
+					log.Error(err)
+				}
+				adr := &fimpgo.Address{MsgType: fimpgo.MsgTypeEvt, ResourceType: fimpgo.ResourceTypeDevice, ResourceName: model.ServiceName, ResourceAddress: "1", ServiceName: "media_player", ServiceAddress: addr}
+				msg := fimpgo.NewMessage("evt.volume.report", "media_player", fimpgo.VTypeStrMap, fc.states.Volume.Muteenabled, nil, nil, newMsg.Payload)
+				fc.mqt.Publish(adr, msg)
+			}
 
 		case "cmd.standby.set":
 			log.Debug("am i here or what")
@@ -276,7 +356,7 @@ func (fc *FromFimpRouter) routeFimpMessage(newMsg *fimpgo.Message) {
 			// 		log.Error("Volume error", err)
 			// 	}
 
-			// 	success, err := fc.mute.MuteSet(val, CorrID, fc.configs.AccessToken)
+			// success, err := fc.mute.MuteSet(val, CorrID, fc.configs.AccessToken)
 			// 	if err != nil {
 			// 		log.Error(err)
 			// 	}
