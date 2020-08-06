@@ -61,6 +61,7 @@ func (fc *FromFimpRouter) Start() {
 func (fc *FromFimpRouter) routeFimpMessage(newMsg *fimpgo.Message) {
 	log.Debug("New fimp msg")
 	addr := strings.Replace(newMsg.Addr.ServiceAddress, "_0", "", 1)
+	scan := bose.Client{}
 	switch newMsg.Payload.Service {
 	case "media_player":
 
@@ -407,6 +408,7 @@ func (fc *FromFimpRouter) routeFimpMessage(newMsg *fimpgo.Message) {
 
 		case "cmd.system.sync":
 			// // scan network again
+			fc.states.Player = nil
 			resolver, err := zeroconf.NewResolver(nil)
 			if err != nil {
 				log.Fatalln("Failed to initialize resolver:", err.Error())
@@ -414,7 +416,6 @@ func (fc *FromFimpRouter) routeFimpMessage(newMsg *fimpgo.Message) {
 
 			entries := make(chan *zeroconf.ServiceEntry)
 			go func(results <-chan *zeroconf.ServiceEntry) {
-				fc.states.Player = nil
 				for entry := range results {
 					log.Println(entry)
 					var ip string
@@ -422,7 +423,7 @@ func (fc *FromFimpRouter) routeFimpMessage(newMsg *fimpgo.Message) {
 						ip = entry.AddrIPv4[i].String()
 					}
 
-					players, err := fc.client.GetInfo(ip, entry.Port)
+					players, err := scan.GetInfo(ip, entry.Port)
 					if err != nil {
 						log.Error(err)
 					}
