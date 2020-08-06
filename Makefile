@@ -2,7 +2,7 @@ version_file=VERSION
 working_dir=$(shell pwd)
 arch="armhf"
 remote_host = "fh@cube.local"
-version:=`git describe --tags | tags -c 2-`
+version:=`git describe --tags | cut -c 2-`
 
 clean:
 	-rm -f ./src/bose
