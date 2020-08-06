@@ -56,8 +56,86 @@
       "interfaces": [
         {
           "intf_t": "in",
-          "msg_t": "cmd.app.get_manifest",
+          "msg_t": "cmd.playback.set",
+          "val_t": "string",
+          "ver": "1"
+        },
+        {
+          "intf_t": "in",
+          "msg_t": "cmd.playback.get_report",
           "val_t": "null",
+          "ver": "1"
+        },
+        {
+          "intf_t": "out",
+          "msg_t": "evt.playback.report",
+          "val_t": "string",
+          "ver": "1"
+        },
+        {
+          "intf_t": "in",
+          "msg_t": "cmd.playbackmode.set",
+          "val_t": "bool_map",
+          "ver": "1"
+        },
+        {
+          "intf_t": "in",
+          "msg_t": "cmd.playbackmode.get_report",
+          "val_t": "null",
+          "ver": "1"
+        },
+        {
+          "intf_t": "out",
+          "msg_t": "evt.playbackmode.report",
+          "val_t": "bool_map",
+          "ver": "1"
+        },
+        {
+          "intf_t": "in",
+          "msg_t": "cmd.volume.set",
+          "val_t": "int",
+          "ver": "1"
+        },
+        {
+          "intf_t": "in",
+          "msg_t": "cmd.volume.get_report",
+          "val_t": "null",
+          "ver": "1"
+        },
+        {
+          "intf_t": "out",
+          "msg_t": "evt.volume.report",
+          "val_t": "int",
+          "ver": "1"
+        },
+        {
+          "intf_t": "in",
+          "msg_t": "cmd.mute.set",
+          "val_t": "bool",
+          "ver": "1"
+        },
+        {
+          "intf_t": "in",
+          "msg_t": "cmd.mute.get_report",
+          "val_t": "null",
+          "ver": "1"
+        },
+        {
+          "intf_t": "out",
+          "msg_t": "evt.mute.report",
+          "val_t": "string",
+          "ver": "1"
+        },
+        {
+          "intf_t": "in",
+          "msg_t": "cmd.app.get_manifest",
+          "val_t": "string",
+          "ver": "1"
+        },
+        {
+          "intf_t": "out",
+          "msg_t": "evt.app.manifest_report",
+          "val_t": "object",
           "ver": "1"
         },
         {
@@ -67,65 +145,39 @@
           "ver": "1"
         },
         {
+          "intf_t": "out",
+          "msg_t": "evt.pd7.response",
+          "val_t": "object",
+          "ver": "1"
+        },
+        {
           "intf_t": "in",
-          "msg_t": "cmd.system.reconnect",
+          "msg_t": "cmd.app.get_state",
+          "val_t": "null",
+          "ver": "1"
+        },
+        {
+          "intf_t": "in",
+          "msg_t": "cmd.config.get_extended_report",
           "val_t": "null",
           "ver": "1"
         },
         {
           "intf_t": "out",
-          "msg_t": "evt.app.manifest_report",
-          "val_t": "object",
+          "msg_t": "evt.config.extended_report",
+          "val_t": "null",
           "ver": "1"
-        },{
-          "intf_t": "out",
-          "msg_t": "cmd.app.get_full_state",
-          "val_t": "string",
-          "ver": "1"
-        },{
-          "intf_t": "out",
-          "msg_t": "cmd.app.full_state_report",
-          "val_t": "object",
-          "ver": "1"
-        },{
+        },
+        {
           "intf_t": "in",
           "msg_t": "cmd.config.extended_set",
-          "val_t": "str_map",
-          "ver": "1"
-        },{
-          "intf_t": "in",
-          "msg_t": "cmd.auth.set_tokens",
-          "val_t": "str_map",
+          "val_t": "object",
           "ver": "1"
         },
         {
           "intf_t": "out",
-          "msg_t": "evt.auth.login_report",
-          "val_t": "string",
-          "ver": "1"
-        },
-        {
-          "intf_t": "in",
-          "msg_t": "cmd.network.get_all_nodes",
-          "val_t": "null",
-          "ver": "1"
-        },
-        {
-          "intf_t": "in",
-          "msg_t": "cmd.thing.get_inclusion_report",
-          "val_t": "string",
-          "ver": "1"
-        },
-        {
-          "intf_t": "in",
-          "msg_t": "cmd.thing.inclusion",
-          "val_t": "string",
-          "ver": "1"
-        },
-        {
-          "intf_t": "in",
-          "msg_t": "cmd.thing.delete",
-          "val_t": "string",
+          "msg_t": "evt.app.config_report",
+          "val_t": "object",
           "ver": "1"
         },
         {
@@ -135,21 +187,27 @@
           "ver": "1"
         },
         {
-          "intf_t": "out",
-          "msg_t": "evt.thing.exclusion_report",
-          "val_t": "object",
-          "ver": "1"
-        },
-        {
-          "intf_t": "out",
-          "msg_t": "evt.network.all_nodes_report",
-          "val_t": "object",
+          "intf_t": "in",
+          "msg_t": "cmd.log.set_level",
+          "val_t": "string",
           "ver": "1"
         },
         {
           "intf_t": "in",
-          "msg_t": "cmd.log.set_level",
-          "val_t": "string",
+          "msg_t": "cmd.system.reconnect",
+          "val_t": "null",
+          "ver": "1"
+        },
+        {
+          "intf_t": "in",
+          "msg_t": "cmd.app.factory_reset",
+          "val_t": "null",
+          "ver": "1"
+        },
+        {
+          "intf_t": "in",
+          "msg_t": "cmd.thing.delete",
+          "val_t": "str_map",
           "ver": "1"
         }
       ]

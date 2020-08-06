@@ -443,6 +443,14 @@ func (fc *FromFimpRouter) routeFimpMessage(newMsg *fimpgo.Message) {
 			}
 
 			<-ctx.Done()
+			val := map[string]interface{}{
+				"errors":  nil,
+				"success": true,
+			}
+			msg := fimpgo.NewMessage("evt.pd7.response", "vinculum", fimpgo.VTypeObject, val, nil, nil, newMsg.Payload)
+			if err := fc.mqt.RespondToRequest(newMsg.Payload, msg); err != nil {
+				log.Error("Could not respond to wanted request")
+			}
 
 		case "cmd.app.get_state":
 			msg := fimpgo.NewMessage("evt.app.manifest_report", model.ServiceName, fimpgo.VTypeObject, fc.appLifecycle.GetAllStates(), nil, nil, newMsg.Payload)
