@@ -1,19 +1,22 @@
-version="0.0.1"
 version_file=VERSION
 working_dir=$(shell pwd)
 arch="armhf"
 remote_host = "fh@cube.local"
+version:=`git describe --tags | tags -c 2-`
 
 clean:
 	-rm -f ./src/bose
 
+init: 
+	git config core.hooksPath .githooks
+
 build-go:
 	cd ./src;go build -o bose service.go;cd ../
 
-build-go-arm:
+build-go-arm: init
 	cd ./src;GOOS=linux GOARCH=arm GOARM=6 go build -ldflags="-s -w" -o bose service.go;cd ../
 
-build-go-amd:
+build-go-amd: init
 	cd ./src;GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o bose service.go;cd ../
 
 
@@ -24,11 +27,9 @@ configure-amd64:
 	python ./scripts/config_env.py prod $(version) amd64
 
 package-tar:
-	tar cvzf bose_$(version).tar.gz bose VERSION
+	tar cvzf bose_$(version).tar.gz bose $(version_file)
 
 clean-deb:
-	find package/debian -name ".DS_Store" -delete
-	find package/debian -name "delete_me" -delete
 	find package/debian -name ".DS_Store" -delete
 	find package/debian -name "delete_me" -delete
 
@@ -50,7 +51,7 @@ deb-arm : clean configure-arm build-go-arm package-deb-doc
 
 deb-amd : configure-amd64 build-go-amd package-deb-doc
 	@echo "Building Thingsplex AMD package"
-	mv package/debian.deb bose_$(version)_amd64.deb
+	mv package/debian.deb package/build/bose_$(version)_amd64.deb
 
 upload :
 	@echo "Uploading the package to remote host"

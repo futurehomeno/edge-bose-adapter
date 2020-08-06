@@ -1,1 +1,15 @@
+.DS_Store
+bose
+*.exe
+
+# Debian packaging
+VERSION
+control
+*.Debian
+package/build
+
+# IDE
 .idea
+.vscode
+
+src/testdata
