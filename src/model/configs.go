@@ -16,19 +16,18 @@ const ServiceName = "bose"
 
 type Configs struct {
 	path               string
-	InstanceAddress    string `json:"instance_address"`
-	MqttServerURI      string `json:"mqtt_server_uri"`
-	MqttUsername       string `json:"mqtt_server_username"`
-	MqttPassword       string `json:"mqtt_server_password"`
-	MqttClientIdPrefix string `json:"mqtt_client_id_prefix"`
-	LogFile            string `json:"log_file"`
-	LogLevel           string `json:"log_level"`
-	LogFormat          string `json:"log_format"`
-	WorkDir            string `json:"-"`
-	ConfiguredAt       string `json:"configured_at"`
-	ConfiguredBy       string `json:"configured_by"`
-	Param1             bool   `json:"param_1"`
-	Param2             string `json:"param_2"`
+	InstanceAddress    string        `json:"instance_address"`
+	MqttServerURI      string        `json:"mqtt_server_uri"`
+	MqttUsername       string        `json:"mqtt_server_username"`
+	MqttPassword       string        `json:"mqtt_server_password"`
+	MqttClientIdPrefix string        `json:"mqtt_client_id_prefix"`
+	LogFile            string        `json:"log_file"`
+	LogLevel           string        `json:"log_level"`
+	LogFormat          string        `json:"log_format"`
+	WorkDir            string        `json:"-"`
+	ConfiguredAt       string        `json:"configured_at"`
+	ConfiguredBy       string        `json:"configured_by"`
+	WantedPlayers      []interface{} `json:"players"`
 }
 
 func NewConfigs(workDir string) *Configs {

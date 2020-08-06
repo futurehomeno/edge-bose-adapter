@@ -8,7 +8,7 @@ then
 
   useradd -r -N -M -d / -s /bin/false -g thingsplex bose || true
 
-  chown -R bose:thingsplex /var/log/thingsplex/bose/ || true
+  chown -R bose:thingsplex /var/log/thingsplex/bose/bose.log || true
   chown -R bose:bose /opt/thingsplex/bose/ || true
 fi
 

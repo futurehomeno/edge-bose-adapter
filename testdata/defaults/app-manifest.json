@@ -1,140 +1,58 @@
 {
   "configs":[
     {
-      "id": "param_1",
-      "label": {"en": "Param 1"},
-      "val_t": "bool",
+      "id": "players",
+      "label": {"en": "Players found on your network. Choose which ones you want to include in the futurehome app."},
+      "val_t": "str_map",
       "ui": {
-        "type": "list_radio",
-        "select": [{"val": true,"label": {"en": "Option 1"}},{"val": false,"label": {"en": "Option 2"}}]
+        "type": "list_checkbox",
+        "select": [{}]
       },
       "val": {
-        "default": false
-      },
-      "is_required": true,
-      "hidden":false,
-      "config_point": "init"
-    },
-    {
-      "id": "param_2",
-      "label": {"en": "Parameter 2"},
-      "val_t": "string",
-      "ui": {
-        "type": "select_horizontal",
-        "select": [{"val": "o1","label": {"en": "Option 1"}},{"val": "o2","label":{"en": "Option 2"}}]
-      },
-      "val": {
-        "default": "o1"
+        "default": "nothing"
       },
       "is_required": true,
       "hidden":false,
       "config_point": "any"
-    },
-    {
-      "id": "param_3",
-      "label": {"en": "Parameter 3"},
-      "val_t": "str_map",
-      "ui": {
-        "type": "list_checkbox",
-        "select": [{"val": "o1","label": {"en": "Option 1"}},{"val": "o2","label": {"en": "Option 1"}},{"val":"o3", "label": {"en": "Option 3"}}]
-      },
-      "val": {
-        "default": ["o1","o2"]
-      },
-      "is_required": true,
-      "hidden":false,
-      "config_point": "init"
-    },
-    {
-      "id": "param_4",
-      "label": {"en": "Please enter the code into Apple Home app"},
-      "val_t": "string",
-      "ui": {
-        "type": "input_readonly"
-      },
-      "val": {
-        "default": ""
-      },
-      "is_required": false,
-      "hidden":false,
-      "config_point": "connection"
     }
   ],
   "ui_buttons": [
     {
-      "id":"fh.default.sync",
-      "label": {"en": "Sync"},
+      "id":"sync",
+      "label": {"en": "sync"},
       "req": {
-        "serv":"hue",
+        "serv":"bose",
         "intf_t": "cmd.system.sync",
-        "val": "action1"
-      },
-      "hidden":false
-    },
-    {
-      "id":"reconnect",
-      "label": {"en": "Reconnect"},
-      "req": {
-        "serv":"hue",
-        "intf_t": "cmd.system.reconnect",
-        "val": "action2"
-      },
-      "hidden":false
-    },{
-      "id":"factory_reset",
-      "label": {"en": "Factory reset"},
-      "req": {
-        "serv":"app-one",
-        "intf_t": "cmd.app.factory_reset",
-        "val": "action2"
+        "val": ""
       },
       "hidden":false
     }
-
   ],
   "ui_blocks": [
     {
-      "id": "block_1",
-      "header": {"en": "App configuration"},
+      "id": "players",
+      "header": {"en": "Choose players"},
       "text": {"en": ""},
-      "configs": ["param_1","param_2","param_2"],
-      "buttons": ["reconnect"],
-      "footer": {"en": "footer text"},
-      "hidden":false
+      "configs": ["players"],
+      "buttons": [],
+      "footer": {"en": ""},
+      "hidden": false
     },
     {
-      "id": "block_2",
-      "header": {"en": "Security"},
-      "text": {"en": ""},
-      "configs": ["param_4"],
-      "buttons": [],
-      "footer": {"en": "footer text"},
-      "hidden":false
-    },{
-      "id": "block_3",
-      "header": {"en": "Factory reset"},
-      "text": {"en": "The operation can't be undone"},
+      "id": "sync",
+      "header": {"en": "Scan network for new speakers"},
+      "text": {"en": "Scan your network to discover new speakers. Previously included devices will not be deleted."},
       "configs": [],
-      "buttons": ["factory_reset"],
-      "footer": {"en": ""},
-      "hidden":false
+      "buttons": ["sync"],
+      "footer": {"en": ""}
     }
   ],
-  "auth": {
-    "type": "password",
-    "code_grant_login_page_url" : "",
-    "redirect_url": "",
-    "client_id": "",
-    "secret": "",
-    "partner_id": "",
-    "auth_endpoint": ""
-  },
-  "init_flow":["auth","connect"],
+  "init_flow":["connect"],
   "services": [
     {
-      "name": "hue",
+      "name": "bose",
       "alias": "Network managment",
-      "address": "/rt:ad/rn:hue/ad:1",
+      "address": "/rt:ad/rn:bose/ad:1",
       "interfaces": [
         {
           "intf_t": "in",

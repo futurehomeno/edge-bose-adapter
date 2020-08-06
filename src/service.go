@@ -54,14 +54,6 @@ func main() {
 	fimpRouter := router.NewFromFimpRouter(mqtt, appLifecycle, configs, states)
 	fimpRouter.Start()
 
-	appLifecycle.SetConnectionState(edgeapp.ConnStateDisconnected)
-	appLifecycle.SetAppState(edgeapp.AppStateRunning, nil)
-	if states.IsConfigured() && err == nil {
-		appLifecycle.SetConnectionState(edgeapp.ConnStateConnected)
-	} else {
-		appLifecycle.SetConnectionState(edgeapp.ConnStateDisconnected)
-	}
-
 	resolver, err := zeroconf.NewResolver(nil)
 	if err != nil {
 		log.Fatalln("Failed to initialize resolver:", err.Error())
@@ -90,7 +82,7 @@ func main() {
 		log.Println("No more entries.")
 	}(entries)
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
 	err = resolver.Browse(ctx, "._soundtouch._tcp", ".local", entries)
 	if err != nil {
@@ -99,21 +91,29 @@ func main() {
 
 	<-ctx.Done()
 
+	appLifecycle.SetConnectionState(edgeapp.ConnStateDisconnected)
+	appLifecycle.SetAppState(edgeapp.AppStateRunning, nil)
+	if states.IsConfigured() && err == nil {
+		appLifecycle.SetConnectionState(edgeapp.ConnStateConnected)
+	} else {
+		appLifecycle.SetConnectionState(edgeapp.ConnStateDisconnected)
+	}
+
 	for {
 		appLifecycle.WaitForState("main", edgeapp.AppStateRunning)
 		ticker := time.NewTicker(time.Duration(30) * time.Second)
 		for ; true; <-ticker.C {
 			// pb := handler.Playback{}
 			for i := 0; i < len(states.Player); i++ {
-				if appLifecycle.ConfigState() == edgeapp.ConfigStateNotConfigured {
-					log.Debug("I SHOULD SEND INCLUSION REPORT")
-					inclReport := model.MakeInclusionReport(states.Player[i])
+				// if appLifecycle.ConfigState() == edgeapp.ConfigStateNotConfigured {
+				// 	log.Debug("I SHOULD SEND INCLUSION REPORT")
+				// 	inclReport := model.MakeInclusionReport(states.Player[i])
 
-					msg := fimpgo.NewMessage("evt.thing.inclusion_report", "bose", fimpgo.VTypeObject, inclReport, nil, nil, nil)
-					adr := fimpgo.Address{MsgType: fimpgo.MsgTypeEvt, ResourceType: fimpgo.ResourceTypeAdapter, ResourceName: "bose", ResourceAddress: "1"}
-					mqtt.Publish(&adr, msg)
-					appLifecycle.SetConfigState(edgeapp.ConfigStateConfigured)
-				}
+				// 	msg := fimpgo.NewMessage("evt.thing.inclusion_report", "bose", fimpgo.VTypeObject, inclReport, nil, nil, nil)
+				// 	adr := fimpgo.Address{MsgType: fimpgo.MsgTypeEvt, ResourceType: fimpgo.ResourceTypeAdapter, ResourceName: "bose", ResourceAddress: "1"}
+				// 	mqtt.Publish(&adr, msg)
+				// 	appLifecycle.SetConfigState(edgeapp.ConfigStateConfigured)
+				// }
 				// ip := states.Player[i].NetworkInfo[0].IpAddress
 				// nowplaying, err := client.GetNowPlaying(ip, "8090")
 				// if err != nil {
