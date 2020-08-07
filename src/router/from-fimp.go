@@ -81,6 +81,21 @@ func (fc *FromFimpRouter) routeFimpMessage(newMsg *fimpgo.Message) {
 			if err != nil {
 				log.Error(err)
 			}
+			if fc.states.NowPlaying.Source == "INVALID_SOURCE" {
+				fc.pb.PlaybackSet("POWER", "192.168.100.30", "8090")
+				// rebooting device
+				for i := 0; i < 10; i++ {
+					fc.states.NowPlaying, err = fc.client.GetNowPlaying(deviceIP, "8090")
+					if err == nil && fc.states.NowPlaying.Source == "STANDBY" {
+						break
+					}
+					log.Info("Trying to reboot device")
+					time.Sleep(time.Second * 1)
+					if i == 10 {
+						log.Error("Could not reboot device. Please try again.")
+					}
+				}
+			}
 			if fc.states.NowPlaying.Source == "STANDBY" { // wake up device
 				_, err := fc.pb.WakeUp(deviceIP, "8090")
 				if err != nil {
