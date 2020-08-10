@@ -179,11 +179,11 @@ func (fc *FromFimpRouter) routeFimpMessage(newMsg *fimpgo.Message) {
 				adr := &fimpgo.Address{MsgType: fimpgo.MsgTypeEvt, ResourceType: fimpgo.ResourceTypeDevice, ResourceName: model.ServiceName, ResourceAddress: "1", ServiceName: "media_player", ServiceAddress: addr}
 				msg := fimpgo.NewMessage("evt.playback.report", "media_player", fimpgo.VTypeStrMap, "stop", nil, nil, newMsg.Payload)
 				fc.mqt.Publish(adr, msg)
-			} else if fc.states.NowPlaying.Source == "PLAYING" {
+			} else if fc.states.NowPlaying.PlayStatus == "PLAY_STATE" {
 				adr := &fimpgo.Address{MsgType: fimpgo.MsgTypeEvt, ResourceType: fimpgo.ResourceTypeDevice, ResourceName: model.ServiceName, ResourceAddress: "1", ServiceName: "media_player", ServiceAddress: addr}
 				msg := fimpgo.NewMessage("evt.playback.report", "media_player", fimpgo.VTypeStrMap, "play", nil, nil, newMsg.Payload)
 				fc.mqt.Publish(adr, msg)
-			} else if fc.states.NowPlaying.Source == "PAUSED" {
+			} else if fc.states.NowPlaying.PlayStatus == "PAUSE_STATE" {
 				adr := &fimpgo.Address{MsgType: fimpgo.MsgTypeEvt, ResourceType: fimpgo.ResourceTypeDevice, ResourceName: model.ServiceName, ResourceAddress: "1", ServiceName: "media_player", ServiceAddress: addr}
 				msg := fimpgo.NewMessage("evt.playback.report", "media_player", fimpgo.VTypeStrMap, "pause", nil, nil, newMsg.Payload)
 				fc.mqt.Publish(adr, msg)
@@ -376,6 +376,24 @@ func (fc *FromFimpRouter) routeFimpMessage(newMsg *fimpgo.Message) {
 		case "cmd.standby.set":
 			// this is only for testing
 			fc.pb.PlaybackSet("POWER", "192.168.100.30", "8090")
+			
+		case "cmd.metadata.get_report":
+			deviceIP, err := handler.GetIPFromID(addr, fc.states.Player)
+			if err != nil {
+				log.Error(err)
+			}
+			fc.states.NowPlaying, err = fc.client.GetNowPlaying(deviceIP, "8090")
+			if err != nil {
+				log.Error(err)
+			}
+			val := map[string]string{
+				"album": fc.states.NowPlaying.Album,
+				"track": fc.states.NowPlaying.Track,
+				"artist": fc.states.NowPlaying.Artist,
+			}
+			adr := &fimpgo.Address{MsgType: fimpgo.MsgTypeEvt, ResourceType: fimpgo.ResourceTypeDevice, ResourceName: model.ServiceName, ResourceAddress: "1", ServiceName: "media_player", ServiceAddress: addr}
+			msg := fimpgo.NewMessage("evt.metadata.report", "media_player", fimpgo.VTypeStrMap, val, nil, nil, newMsg.Payload)
+			fc.mqt.Publish(adr, msg)
 		}
 
 	case model.ServiceName:

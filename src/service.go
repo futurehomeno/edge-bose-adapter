@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"time"
+	"reflect"
 
 	"github.com/thingsplex/bose/bose-api"
 
@@ -15,6 +16,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/thingsplex/bose/model"
 	"github.com/thingsplex/bose/router"
+
 )
 
 func main() {
@@ -101,48 +103,103 @@ func main() {
 
 	for {
 		appLifecycle.WaitForState("main", edgeapp.AppStateRunning)
-		ticker := time.NewTicker(time.Duration(30) * time.Second)
+		ticker := time.NewTicker(time.Duration(15) * time.Second)
+		var oldReport map[string]interface{}
+		var oldPbStateValue string
+		var oldPlayModes map[string]bool
+		var oldVolume string
+		var oldMuted string
 		for ; true; <-ticker.C {
-			// pb := handler.Playback{}
 			for i := 0; i < len(states.Player); i++ {
-				// if appLifecycle.ConfigState() == edgeapp.ConfigStateNotConfigured {
-				// 	log.Debug("I SHOULD SEND INCLUSION REPORT")
-				// 	inclReport := model.MakeInclusionReport(states.Player[i])
+				PlayerIP := states.Player[i].NetworkInfo[0].IpAddress
+				states.NowPlaying, err = client.GetNowPlaying(PlayerIP, "8090")
+				if err == nil {
+					report := map[string]interface{}{
+						"album": states.NowPlaying.Album,
+						"track": states.NowPlaying.Track,
+						"artist": states.NowPlaying.Artist,
+					}
+					adr := &fimpgo.Address{MsgType: fimpgo.MsgTypeEvt, ResourceType: fimpgo.ResourceTypeDevice, ResourceName: model.ServiceName, ResourceAddress: "1", ServiceName: "media_player", ServiceAddress: states.Player[i].DeviceID}
+					oldReportEqualsNewReport := reflect.DeepEqual(oldReport, report)
+					if !oldReportEqualsNewReport {
+						msg := fimpgo.NewMessage("evt.metadata.report", "media_player", fimpgo.VTypeStrMap, report, nil, nil, nil)
+						mqtt.Publish(adr, msg)
+						oldReport = report
+						log.Info("New metadata message sent to fimp")
+					}
 
-				// 	msg := fimpgo.NewMessage("evt.thing.inclusion_report", "bose", fimpgo.VTypeObject, inclReport, nil, nil, nil)
-				// 	adr := fimpgo.Address{MsgType: fimpgo.MsgTypeEvt, ResourceType: fimpgo.ResourceTypeAdapter, ResourceName: "bose", ResourceAddress: "1"}
-				// 	mqtt.Publish(&adr, msg)
-				// 	appLifecycle.SetConfigState(edgeapp.ConfigStateConfigured)
-				// }
-				// ip := states.Player[i].NetworkInfo[0].IpAddress
-				// nowplaying, err := client.GetNowPlaying(ip, "8090")
-				// if err != nil {
-				// 	log.Error(err)
-				// }
+					if oldPbStateValue != states.NowPlaying.PlayStatus && oldPbStateValue != states.NowPlaying.Source {
+						if states.NowPlaying.Source == "STANDBY" {
+							msg := fimpgo.NewMessage("evt.playback.report", "media_player", fimpgo.VTypeStrMap, "stop", nil, nil, nil)
+							mqtt.Publish(adr, msg)
+							oldPbStateValue = states.NowPlaying.Source
+						} else if states.NowPlaying.PlayStatus == "PLAY_STATE" {
+							msg := fimpgo.NewMessage("evt.playback.report", "media_player", fimpgo.VTypeStrMap, "play", nil, nil, nil)
+							mqtt.Publish(adr, msg)
+							oldPbStateValue = states.NowPlaying.PlayStatus
+						} else if states.NowPlaying.PlayStatus == "PAUSE_STATE" {
+							msg := fimpgo.NewMessage("evt.playback.report", "media_player", fimpgo.VTypeStrMap, "pause", nil, nil, nil)
+							mqtt.Publish(adr, msg)
+							oldPbStateValue = states.NowPlaying.PlayStatus
+						} else {
+							msg := fimpgo.NewMessage("evt.playback.report", "media_player", fimpgo.VTypeStrMap, "unknown", nil, nil, nil)
+							mqtt.Publish(adr, msg)
+							oldPbStateValue = states.NowPlaying.PlayStatus
+						}
+						log.Info("New playback.report sent to fimp")
+					}
+					var shuffle bool
+					var repeatOne bool
+					var repeat bool
+					if states.NowPlaying.ShuffleSetting == "SHUFFLE_OFF" {
+						shuffle = false	
+					} else if states.NowPlaying.ShuffleSetting == "SHUFFLE_ON" {
+						shuffle = true
+					}
+					if states.NowPlaying.RepeatSetting == "REPEAT_OFF" {
+						repeatOne = false
+						repeat = false
+					} else if states.NowPlaying.RepeatSetting == "REPEAT_ONE" {
+						repeatOne = true
+						repeat = false
+					} else if states.NowPlaying.RepeatSetting == "REPEAT_ALL" {
+						repeatOne = false
+						repeat = true
+					}
+					newPlayModes := map[string]bool{
+						"shuffle":    shuffle,
+						"repeat_one": repeatOne,
+						"repeat":     repeat,
+					}
+					oldPlayModesEqualsNewPlayModes := reflect.DeepEqual(oldPlayModes, newPlayModes)
+					if !oldPlayModesEqualsNewPlayModes {
+						msg := fimpgo.NewMessage("evt.playbackmode.report", "media_player", fimpgo.VTypeBoolMap, newPlayModes, nil, nil, nil)
+						mqtt.Publish(adr, msg)
+						oldPlayModes = newPlayModes
+						log.Info("New playbackmode.report sent to fimp")
+					}
 
-				// log.Debug("Nowplaying.Source: ", nowplaying.NowPlaying.Source)
-				// if nowplaying.NowPlaying.Source == "STANDBY" {
-				// 	log.Debug("Source is STANDBY")
-				// 	pb.PlaybackSet("POWER", ip, "8090")
-				// }
-				// if nowplaying.NowPlaying.Source != "STANDBY" {
-				// 	log.Debug("Playstatus: ", nowplaying.NowPlaying.PlayStatus)
-				// }
-				// afterplaying, err := client.GetNowPlaying(ip, "8090")
-				// if err != nil {
-				// 	log.Error(err)
-				// }
-				// log.Debug("STATE AFTER LOOP: ", afterplaying.NowPlaying.PlayStatus)
-				// 	// pb.PlaybackSet("toggle_play_pause", i
+					states.Volume, err = client.GetVolume(PlayerIP, "8090")
+					if err != nil {
+						log.Error(err)
+					}
+					if oldVolume != states.Volume.Targetvolume {
+						msg := fimpgo.NewMessage("evt.volume.report", "media_player", fimpgo.VTypeStrMap, states.Volume.Targetvolume, nil, nil, nil)
+						mqtt.Publish(adr, msg)
+			
+						oldVolume = states.Volume.Targetvolume
+						log.Info("New volume.report sent to fimp")
+					}
+					if oldMuted != states.Volume.Muteenabled {
+						msg := fimpgo.NewMessage("evt.volume.report", "media_player", fimpgo.VTypeStrMap, states.Volume.Muteenabled, nil, nil, nil)
+						mqtt.Publish(adr, msg)
+			
+						oldMuted = states.Volume.Muteenabled
+						log.Info("New mute.report sent to fimp")
+					}
+				}
 			}
 		}
-		// Configure custom resources here
-		//if err := conFimpRouter.Start(); err !=nil {
-		//	appLifecycle.PublishEvent(model.EventConfigError,"main",nil)
-		//}else {
-		//	appLifecycle.WaitForState(model.StateConfiguring,"main")
-		//}
-		//TODO: Add logic here
 		appLifecycle.WaitForState(edgeapp.AppStateNotConfigured, "main")
 	}
 
