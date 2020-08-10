@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
+	"strconv"
 
 	"github.com/grandcat/zeroconf"
 	"github.com/thingsplex/bose/bose-api"
@@ -177,19 +178,19 @@ func (fc *FromFimpRouter) routeFimpMessage(newMsg *fimpgo.Message) {
 			}
 			if fc.states.NowPlaying.Source == "STANDBY" {
 				adr := &fimpgo.Address{MsgType: fimpgo.MsgTypeEvt, ResourceType: fimpgo.ResourceTypeDevice, ResourceName: model.ServiceName, ResourceAddress: "1", ServiceName: "media_player", ServiceAddress: addr}
-				msg := fimpgo.NewMessage("evt.playback.report", "media_player", fimpgo.VTypeStrMap, "stop", nil, nil, newMsg.Payload)
+				msg := fimpgo.NewMessage("evt.playback.report", "media_player", fimpgo.VTypeString, "stop", nil, nil, newMsg.Payload)
 				fc.mqt.Publish(adr, msg)
 			} else if fc.states.NowPlaying.PlayStatus == "PLAY_STATE" {
 				adr := &fimpgo.Address{MsgType: fimpgo.MsgTypeEvt, ResourceType: fimpgo.ResourceTypeDevice, ResourceName: model.ServiceName, ResourceAddress: "1", ServiceName: "media_player", ServiceAddress: addr}
-				msg := fimpgo.NewMessage("evt.playback.report", "media_player", fimpgo.VTypeStrMap, "play", nil, nil, newMsg.Payload)
+				msg := fimpgo.NewMessage("evt.playback.report", "media_player", fimpgo.VTypeString, "play", nil, nil, newMsg.Payload)
 				fc.mqt.Publish(adr, msg)
 			} else if fc.states.NowPlaying.PlayStatus == "PAUSE_STATE" {
 				adr := &fimpgo.Address{MsgType: fimpgo.MsgTypeEvt, ResourceType: fimpgo.ResourceTypeDevice, ResourceName: model.ServiceName, ResourceAddress: "1", ServiceName: "media_player", ServiceAddress: addr}
-				msg := fimpgo.NewMessage("evt.playback.report", "media_player", fimpgo.VTypeStrMap, "pause", nil, nil, newMsg.Payload)
+				msg := fimpgo.NewMessage("evt.playback.report", "media_player", fimpgo.VTypeString, "pause", nil, nil, newMsg.Payload)
 				fc.mqt.Publish(adr, msg)
 			} else {
 				adr := &fimpgo.Address{MsgType: fimpgo.MsgTypeEvt, ResourceType: fimpgo.ResourceTypeDevice, ResourceName: model.ServiceName, ResourceAddress: "1", ServiceName: "media_player", ServiceAddress: addr}
-				msg := fimpgo.NewMessage("evt.playback.report", "media_player", fimpgo.VTypeStrMap, "unknown", nil, nil, newMsg.Payload)
+				msg := fimpgo.NewMessage("evt.playback.report", "media_player", fimpgo.VTypeString, "unknown", nil, nil, newMsg.Payload)
 				fc.mqt.Publish(adr, msg)
 			}
 
@@ -321,8 +322,12 @@ func (fc *FromFimpRouter) routeFimpMessage(newMsg *fimpgo.Message) {
 				if err != nil {
 					log.Error(err)
 				}
+				val, err := strconv.Atoi(fc.states.Volume.Targetvolume)
+				if err != nil {
+					log.Error(err)
+				}
 				adr := &fimpgo.Address{MsgType: fimpgo.MsgTypeEvt, ResourceType: fimpgo.ResourceTypeDevice, ResourceName: model.ServiceName, ResourceAddress: "1", ServiceName: "media_player", ServiceAddress: addr}
-				msg := fimpgo.NewMessage("evt.volume.report", "media_player", fimpgo.VTypeStrMap, fc.states.Volume.Targetvolume, nil, nil, newMsg.Payload)
+				msg := fimpgo.NewMessage("evt.volume.report", "media_player", fimpgo.VTypeInt, val, nil, nil, newMsg.Payload)
 				fc.mqt.Publish(adr, msg)
 			}
 
@@ -335,8 +340,12 @@ func (fc *FromFimpRouter) routeFimpMessage(newMsg *fimpgo.Message) {
 			if err != nil {
 				log.Error(err)
 			}
+			val, err := strconv.Atoi(fc.states.Volume.Targetvolume)
+			if err != nil {
+				log.Error(err)
+			}
 			adr := &fimpgo.Address{MsgType: fimpgo.MsgTypeEvt, ResourceType: fimpgo.ResourceTypeDevice, ResourceName: model.ServiceName, ResourceAddress: "1", ServiceName: "media_player", ServiceAddress: addr}
-			msg := fimpgo.NewMessage("evt.volume.report", "media_player", fimpgo.VTypeStrMap, fc.states.Volume.Targetvolume, nil, nil, newMsg.Payload)
+			msg := fimpgo.NewMessage("evt.volume.report", "media_player", fimpgo.VTypeInt, val, nil, nil, newMsg.Payload)
 			fc.mqt.Publish(adr, msg)
 
 		case "cmd.mute.set":
@@ -355,8 +364,14 @@ func (fc *FromFimpRouter) routeFimpMessage(newMsg *fimpgo.Message) {
 				if err != nil {
 					log.Error(err)
 				}
+				var val bool
+				if fc.states.Volume.Muteenabled == "true" {
+					val = true
+				} else {
+					val = false
+				}
 				adr := &fimpgo.Address{MsgType: fimpgo.MsgTypeEvt, ResourceType: fimpgo.ResourceTypeDevice, ResourceName: model.ServiceName, ResourceAddress: "1", ServiceName: "media_player", ServiceAddress: addr}
-				msg := fimpgo.NewMessage("evt.volume.report", "media_player", fimpgo.VTypeStrMap, fc.states.Volume.Muteenabled, nil, nil, newMsg.Payload)
+				msg := fimpgo.NewMessage("evt.mute.report", "media_player", fimpgo.VTypeBool, val, nil, nil, newMsg.Payload)
 				fc.mqt.Publish(adr, msg)
 			}
 
@@ -369,8 +384,14 @@ func (fc *FromFimpRouter) routeFimpMessage(newMsg *fimpgo.Message) {
 			if err != nil {
 				log.Error(err)
 			}
+			var val bool
+				if fc.states.Volume.Muteenabled == "true" {
+					val = true
+				} else {
+					val = false
+				}
 			adr := &fimpgo.Address{MsgType: fimpgo.MsgTypeEvt, ResourceType: fimpgo.ResourceTypeDevice, ResourceName: model.ServiceName, ResourceAddress: "1", ServiceName: "media_player", ServiceAddress: addr}
-			msg := fimpgo.NewMessage("evt.volume.report", "media_player", fimpgo.VTypeStrMap, fc.states.Volume.Muteenabled, nil, nil, newMsg.Payload)
+			msg := fimpgo.NewMessage("evt.mute.report", "media_player", fimpgo.VTypeBool, val, nil, nil, newMsg.Payload)
 			fc.mqt.Publish(adr, msg)
 
 		case "cmd.standby.set":

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"time"
 	"reflect"
+	"strconv"
 
 	"github.com/thingsplex/bose/bose-api"
 
@@ -184,14 +185,24 @@ func main() {
 						log.Error(err)
 					}
 					if oldVolume != states.Volume.Targetvolume {
-						msg := fimpgo.NewMessage("evt.volume.report", "media_player", fimpgo.VTypeStrMap, states.Volume.Targetvolume, nil, nil, nil)
+						vol, err := strconv.Atoi(states.Volume.Targetvolume)
+						if err != nil {
+							log.Error(err)
+						}
+						msg := fimpgo.NewMessage("evt.volume.report", "media_player", fimpgo.VTypeInt, vol, nil, nil, nil)
 						mqtt.Publish(adr, msg)
 			
 						oldVolume = states.Volume.Targetvolume
 						log.Info("New volume.report sent to fimp")
 					}
 					if oldMuted != states.Volume.Muteenabled {
-						msg := fimpgo.NewMessage("evt.volume.report", "media_player", fimpgo.VTypeStrMap, states.Volume.Muteenabled, nil, nil, nil)
+						var mute bool
+						if states.Volume.Muteenabled == "true" {
+							mute = true
+						} else {
+							mute = false
+						}
+						msg := fimpgo.NewMessage("evt.volume.report", "media_player", fimpgo.VTypeStrMap, mute, nil, nil, nil)
 						mqtt.Publish(adr, msg)
 			
 						oldMuted = states.Volume.Muteenabled
