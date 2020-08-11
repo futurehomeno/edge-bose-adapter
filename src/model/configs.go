@@ -28,6 +28,7 @@ type Configs struct {
 	ConfiguredAt       string        `json:"configured_at"`
 	ConfiguredBy       string        `json:"configured_by"`
 	WantedPlayers      []interface{} `json:"players"`
+	ScanSec			   string		 `json:"scan_sec"`
 }
 
 func NewConfigs(workDir string) *Configs {

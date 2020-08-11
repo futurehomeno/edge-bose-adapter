@@ -6,6 +6,7 @@
   "mqtt_server_password":"",
   "work_dir": "/opt/thingsplex/bose",
   "log_file": "/var/log/thingsplex/bose/bose.log",
-  "log_level": "debug",
-  "log_format": "text"
+  "log_level": "info",
+  "log_format": "text",
+  "scan_sec": "10"
 }

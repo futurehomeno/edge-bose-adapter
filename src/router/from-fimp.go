@@ -490,7 +490,10 @@ func (fc *FromFimpRouter) routeFimpMessage(newMsg *fimpgo.Message) {
 				log.Println("No more entries.")
 			}(entries)
 
-			ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+			ScanSecString := fc.configs.ScanSec
+			ScanSec, err := strconv.Atoi(ScanSecString)
+			ctx, cancel := context.WithTimeout(context.Background(), time.Second * time.Duration(ScanSec))
+
 			defer cancel()
 			err = resolver.Browse(ctx, "._soundtouch._tcp", ".local", entries)
 			if err != nil {
@@ -528,6 +531,13 @@ func (fc *FromFimpRouter) routeFimpMessage(newMsg *fimpgo.Message) {
 				// TODO: This is an example . Add your logic here or remove
 				log.Error("Can't parse configuration object")
 				return
+			}
+			scanSec := conf.ScanSec
+			_, err = strconv.Atoi(scanSec)
+			if err != nil {
+				log.Error(fmt.Sprintf("%q is not a number or contains illegal symbols.", scanSec))
+			} else {
+				fc.configs.ScanSec = scanSec
 			}
 			fc.configs.WantedPlayers = conf.WantedPlayers
 			fc.configs.SaveToFile()
