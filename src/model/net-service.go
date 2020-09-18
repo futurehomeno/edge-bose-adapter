@@ -29,7 +29,7 @@ func MakeInclusionReport(Player bose.Player) fimptype.ThingInclusionReport {
 	}, {
 		Type:      "out",
 		MsgType:   "evt.playback.report",
-		ValueType: "str_map",
+		ValueType: "string",
 		Version:   "1",
 	}, {
 		Type:      "in",
