@@ -4,9 +4,9 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"time"
 	"reflect"
 	"strconv"
+	"time"
 
 	"github.com/thingsplex/bose/bose-api"
 
@@ -17,7 +17,6 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/thingsplex/bose/model"
 	"github.com/thingsplex/bose/router"
-
 )
 
 func main() {
@@ -116,8 +115,8 @@ func main() {
 				states.NowPlaying, err = client.GetNowPlaying(PlayerIP, "8090")
 				if err == nil {
 					report := map[string]interface{}{
-						"album": states.NowPlaying.Album,
-						"track": states.NowPlaying.Track,
+						"album":  states.NowPlaying.Album,
+						"track":  states.NowPlaying.Track,
 						"artist": states.NowPlaying.Artist,
 					}
 					adr := &fimpgo.Address{MsgType: fimpgo.MsgTypeEvt, ResourceType: fimpgo.ResourceTypeDevice, ResourceName: model.ServiceName, ResourceAddress: "1", ServiceName: "media_player", ServiceAddress: states.Player[i].DeviceID}
@@ -131,19 +130,19 @@ func main() {
 
 					if oldPbStateValue != states.NowPlaying.PlayStatus && oldPbStateValue != states.NowPlaying.Source {
 						if states.NowPlaying.Source == "STANDBY" {
-							msg := fimpgo.NewMessage("evt.playback.report", "media_player", fimpgo.VTypeStrMap, "stop", nil, nil, nil)
+							msg := fimpgo.NewMessage("evt.playback.report", "media_player", fimpgo.VTypeString, "stop", nil, nil, nil)
 							mqtt.Publish(adr, msg)
 							oldPbStateValue = states.NowPlaying.Source
 						} else if states.NowPlaying.PlayStatus == "PLAY_STATE" {
-							msg := fimpgo.NewMessage("evt.playback.report", "media_player", fimpgo.VTypeStrMap, "play", nil, nil, nil)
+							msg := fimpgo.NewMessage("evt.playback.report", "media_player", fimpgo.VTypeString, "play", nil, nil, nil)
 							mqtt.Publish(adr, msg)
 							oldPbStateValue = states.NowPlaying.PlayStatus
 						} else if states.NowPlaying.PlayStatus == "PAUSE_STATE" {
-							msg := fimpgo.NewMessage("evt.playback.report", "media_player", fimpgo.VTypeStrMap, "pause", nil, nil, nil)
+							msg := fimpgo.NewMessage("evt.playback.report", "media_player", fimpgo.VTypeString, "pause", nil, nil, nil)
 							mqtt.Publish(adr, msg)
 							oldPbStateValue = states.NowPlaying.PlayStatus
 						} else {
-							msg := fimpgo.NewMessage("evt.playback.report", "media_player", fimpgo.VTypeStrMap, "unknown", nil, nil, nil)
+							msg := fimpgo.NewMessage("evt.playback.report", "media_player", fimpgo.VTypeString, "unknown", nil, nil, nil)
 							mqtt.Publish(adr, msg)
 							oldPbStateValue = states.NowPlaying.PlayStatus
 						}
@@ -153,7 +152,7 @@ func main() {
 					var repeatOne bool
 					var repeat bool
 					if states.NowPlaying.ShuffleSetting == "SHUFFLE_OFF" {
-						shuffle = false	
+						shuffle = false
 					} else if states.NowPlaying.ShuffleSetting == "SHUFFLE_ON" {
 						shuffle = true
 					}
@@ -191,7 +190,7 @@ func main() {
 						}
 						msg := fimpgo.NewMessage("evt.volume.report", "media_player", fimpgo.VTypeInt, vol, nil, nil, nil)
 						mqtt.Publish(adr, msg)
-			
+
 						oldVolume = states.Volume.Targetvolume
 						log.Info("New volume.report sent to fimp")
 					}
@@ -202,9 +201,9 @@ func main() {
 						} else {
 							mute = false
 						}
-						msg := fimpgo.NewMessage("evt.volume.report", "media_player", fimpgo.VTypeStrMap, mute, nil, nil, nil)
+						msg := fimpgo.NewMessage("evt.mute.report", "media_player", fimpgo.VTypeBool, mute, nil, nil, nil)
 						mqtt.Publish(adr, msg)
-			
+
 						oldMuted = states.Volume.Muteenabled
 						log.Info("New mute.report sent to fimp")
 					}

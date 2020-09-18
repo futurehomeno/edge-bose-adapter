@@ -167,6 +167,26 @@ func (fc *FromFimpRouter) routeFimpMessage(newMsg *fimpgo.Message) {
 				fc.mqt.Publish(adr, msg)
 			}
 
+			if val == "next_track" || val == "previous_track" {
+				log.Info("You just skipped a track and metadata should be sent now")
+				deviceIP, err := handler.GetIPFromID(addr, fc.states.Player)
+				if err != nil {
+					log.Error(err)
+				}
+				fc.states.NowPlaying, err = fc.client.GetNowPlaying(deviceIP, "8090")
+				if err != nil {
+					log.Error(err)
+				}
+				val := map[string]string{
+					"album":  fc.states.NowPlaying.Album,
+					"track":  fc.states.NowPlaying.Track,
+					"artist": fc.states.NowPlaying.Artist,
+				}
+				adr := &fimpgo.Address{MsgType: fimpgo.MsgTypeEvt, ResourceType: fimpgo.ResourceTypeDevice, ResourceName: model.ServiceName, ResourceAddress: "1", ServiceName: "media_player", ServiceAddress: addr}
+				msg := fimpgo.NewMessage("evt.metadata.report", "media_player", fimpgo.VTypeStrMap, val, nil, nil, newMsg.Payload)
+				fc.mqt.Publish(adr, msg)
+			}
+
 		case "cmd.playback.get_report":
 			deviceIP, err := handler.GetIPFromID(addr, fc.states.Player)
 			if err != nil {
