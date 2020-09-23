@@ -120,7 +120,7 @@ func (fc *FromFimpRouter) routeFimpMessage(newMsg *fimpgo.Message) {
 				log.Error(err)
 			}
 			if success {
-				time.Sleep(time.Second * 1)
+				time.Sleep(time.Second * 3)
 				fc.states.NowPlaying, err = fc.client.GetNowPlaying(deviceIP, "8090")
 				if err != nil {
 					log.Error(err)
