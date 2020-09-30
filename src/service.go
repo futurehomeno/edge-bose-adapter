@@ -130,7 +130,7 @@ func main() {
 
 					if oldPbStateValue != states.NowPlaying.PlayStatus && oldPbStateValue != states.NowPlaying.Source {
 						if states.NowPlaying.Source == "STANDBY" {
-							msg := fimpgo.NewMessage("evt.playback.report", "media_player", fimpgo.VTypeString, "stop", nil, nil, nil)
+							msg := fimpgo.NewMessage("evt.playback.report", "media_player", fimpgo.VTypeString, "pause", nil, nil, nil)
 							mqtt.Publish(adr, msg)
 							oldPbStateValue = states.NowPlaying.Source
 						} else if states.NowPlaying.PlayStatus == "PLAY_STATE" {
@@ -142,7 +142,7 @@ func main() {
 							mqtt.Publish(adr, msg)
 							oldPbStateValue = states.NowPlaying.PlayStatus
 						} else {
-							msg := fimpgo.NewMessage("evt.playback.report", "media_player", fimpgo.VTypeString, "unknown", nil, nil, nil)
+							msg := fimpgo.NewMessage("evt.playback.report", "media_player", fimpgo.VTypeString, "pause", nil, nil, nil)
 							mqtt.Publish(adr, msg)
 							oldPbStateValue = states.NowPlaying.PlayStatus
 						}
@@ -207,6 +207,8 @@ func main() {
 						oldMuted = states.Volume.Muteenabled
 						log.Info("New mute.report sent to fimp")
 					}
+				} else {
+					log.Error("Cant get states from device ", PlayerIP)
 				}
 			}
 		}

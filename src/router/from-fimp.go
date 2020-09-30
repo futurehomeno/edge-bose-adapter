@@ -160,7 +160,7 @@ func (fc *FromFimpRouter) routeFimpMessage(newMsg *fimpgo.Message) {
 				} else if fc.states.NowPlaying.PlayStatus == "PAUSE_STATE" {
 					val = "pause"
 				} else {
-					val = "unknown"
+					val = "pause"
 				}
 				adr := &fimpgo.Address{MsgType: fimpgo.MsgTypeEvt, ResourceType: fimpgo.ResourceTypeDevice, ResourceName: model.ServiceName, ResourceAddress: "1", ServiceName: "media_player", ServiceAddress: addr}
 				msg := fimpgo.NewMessage("evt.playback.report", "media_player", fimpgo.VTypeString, val, nil, nil, newMsg.Payload)
@@ -198,7 +198,7 @@ func (fc *FromFimpRouter) routeFimpMessage(newMsg *fimpgo.Message) {
 			}
 			if fc.states.NowPlaying.Source == "STANDBY" {
 				adr := &fimpgo.Address{MsgType: fimpgo.MsgTypeEvt, ResourceType: fimpgo.ResourceTypeDevice, ResourceName: model.ServiceName, ResourceAddress: "1", ServiceName: "media_player", ServiceAddress: addr}
-				msg := fimpgo.NewMessage("evt.playback.report", "media_player", fimpgo.VTypeString, "stop", nil, nil, newMsg.Payload)
+				msg := fimpgo.NewMessage("evt.playback.report", "media_player", fimpgo.VTypeString, "pause", nil, nil, newMsg.Payload)
 				fc.mqt.Publish(adr, msg)
 			} else if fc.states.NowPlaying.PlayStatus == "PLAY_STATE" {
 				adr := &fimpgo.Address{MsgType: fimpgo.MsgTypeEvt, ResourceType: fimpgo.ResourceTypeDevice, ResourceName: model.ServiceName, ResourceAddress: "1", ServiceName: "media_player", ServiceAddress: addr}
@@ -210,7 +210,7 @@ func (fc *FromFimpRouter) routeFimpMessage(newMsg *fimpgo.Message) {
 				fc.mqt.Publish(adr, msg)
 			} else {
 				adr := &fimpgo.Address{MsgType: fimpgo.MsgTypeEvt, ResourceType: fimpgo.ResourceTypeDevice, ResourceName: model.ServiceName, ResourceAddress: "1", ServiceName: "media_player", ServiceAddress: addr}
-				msg := fimpgo.NewMessage("evt.playback.report", "media_player", fimpgo.VTypeString, "unknown", nil, nil, newMsg.Payload)
+				msg := fimpgo.NewMessage("evt.playback.report", "media_player", fimpgo.VTypeString, "pause", nil, nil, newMsg.Payload)
 				fc.mqt.Publish(adr, msg)
 			}
 
@@ -583,6 +583,10 @@ func (fc *FromFimpRouter) routeFimpMessage(newMsg *fimpgo.Message) {
 
 						msg := fimpgo.NewMessage("evt.thing.inclusion_report", "bose", fimpgo.VTypeObject, inclReport, nil, nil, nil)
 						adr := fimpgo.Address{MsgType: fimpgo.MsgTypeEvt, ResourceType: fimpgo.ResourceTypeAdapter, ResourceName: "bose", ResourceAddress: "1"}
+						fc.mqt.Publish(&adr, msg)
+
+						msg = fimpgo.NewMessage("cmd.playback.get_report", "media_player", fimpgo.VTypeNull, nil, nil, nil, nil)
+						adr = fimpgo.Address{MsgType: fimpgo.MsgTypeCmd, ResourceType: fimpgo.ResourceTypeDevice, ResourceName: "bose", ResourceAddress: "1", ServiceName: "media_player", ServiceAddress: inclReport.Address}
 						fc.mqt.Publish(&adr, msg)
 					}
 				}
