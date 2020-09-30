@@ -656,7 +656,7 @@ func (fc *FromFimpRouter) routeFimpMessage(newMsg *fimpgo.Message) {
 					"address": deviceId,
 				}
 				adr := &fimpgo.Address{MsgType: fimpgo.MsgTypeEvt, ResourceType: fimpgo.ResourceTypeAdapter, ResourceName: "bose", ResourceAddress: "1"}
-				msg := fimpgo.NewMessage("evt.thing.exclusion_report", "bose", fimpgo.VTypeObject, val, nil, nil, nil)
+				msg := fimpgo.NewMessage("evt.thing.exclusion_report", "bose", fimpgo.VTypeObject, val, nil, nil, newMsg.Payload)
 				fc.mqt.Publish(adr, msg)
 				log.Info("Device with deviceID: ", deviceId, " has been removed from network.")
 				log.Info(deviceId)
