@@ -667,6 +667,18 @@ func (fc *FromFimpRouter) routeFimpMessage(newMsg *fimpgo.Message) {
 			} else {
 				log.Error("Incorrect address")
 			}
+
+		case "cmd.app.uninstall":
+			// get all devices and send exclusion report
+			for p := 0; p < len(fc.states.Player); p++ {
+				val := map[string]interface{}{
+					"address": fc.states.Player[p].DeviceID,
+				}
+				adr := &fimpgo.Address{MsgType: fimpgo.MsgTypeEvt, ResourceType: fimpgo.ResourceTypeAdapter, ResourceName: "bose", ResourceAddress: "1"}
+				msg := fimpgo.NewMessage("evt.thing.exclusion_report", "bose", fimpgo.VTypeObject, val, nil, nil, newMsg.Payload)
+				fc.mqt.Publish(adr, msg)
+				log.Info("Device with deviceID: ", fc.states.Player[p].DeviceID, " has been removed from network.")
+			}
 		}
 		fc.configs.SaveToFile()
 		fc.states.SaveToFile()
