@@ -8,15 +8,15 @@ import (
 	"strings"
 	"time"
 
+	"github.com/futurehomeno/edge-bose-adapter/bose-api"
 	"github.com/grandcat/zeroconf"
-	"github.com/thingsplex/bose/bose-api"
 
-	"github.com/thingsplex/bose/handler"
+	"github.com/futurehomeno/edge-bose-adapter/handler"
 
+	"github.com/futurehomeno/edge-bose-adapter/model"
 	"github.com/futurehomeno/fimpgo"
 	"github.com/futurehomeno/fimpgo/edgeapp"
 	log "github.com/sirupsen/logrus"
-	"github.com/thingsplex/bose/model"
 )
 
 type FromFimpRouter struct {

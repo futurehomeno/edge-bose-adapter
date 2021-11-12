@@ -3,7 +3,7 @@ package handler
 import (
 	"fmt"
 
-	"github.com/thingsplex/bose/bose-api"
+	"github.com/futurehomeno/edge-bose-adapter/bose-api"
 )
 
 // GetIPFromID finds the IP address of the player
