@@ -8,15 +8,15 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/thingsplex/bose/bose-api"
+	"github.com/futurehomeno/edge-bose-adapter/bose-api"
 
+	"github.com/futurehomeno/edge-bose-adapter/model"
+	"github.com/futurehomeno/edge-bose-adapter/router"
 	"github.com/futurehomeno/fimpgo"
 	"github.com/futurehomeno/fimpgo/discovery"
 	"github.com/futurehomeno/fimpgo/edgeapp"
 	"github.com/grandcat/zeroconf"
 	log "github.com/sirupsen/logrus"
-	"github.com/thingsplex/bose/model"
-	"github.com/thingsplex/bose/router"
 )
 
 func main() {

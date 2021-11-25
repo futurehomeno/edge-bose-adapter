@@ -8,8 +8,8 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/futurehomeno/edge-bose-adapter/utils"
 	log "github.com/sirupsen/logrus"
-	"github.com/thingsplex/bose/utils"
 )
 
 const ServiceName = "bose"
@@ -28,7 +28,7 @@ type Configs struct {
 	ConfiguredAt       string        `json:"configured_at"`
 	ConfiguredBy       string        `json:"configured_by"`
 	WantedPlayers      []interface{} `json:"players"`
-	ScanSec			   string		 `json:"scan_sec"`
+	ScanSec            string        `json:"scan_sec"`
 }
 
 func NewConfigs(workDir string) *Configs {

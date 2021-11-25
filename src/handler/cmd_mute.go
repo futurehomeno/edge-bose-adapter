@@ -6,8 +6,8 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/futurehomeno/edge-bose-adapter/model"
 	log "github.com/sirupsen/logrus"
-	"github.com/thingsplex/bose/model"
 )
 
 // Mute attributes

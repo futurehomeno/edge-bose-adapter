@@ -4,6 +4,6 @@ set -e
 if [ -d /run/systemd/system ] && [ "$1" = remove ]; then
   deb-systemd-invoke stop bose.service >/dev/null
   systemctl disable bose.service || true
-  rm /var/log/thingsplex/bose/* || true
-  rm /opt/thingsplex/bose/data/* || true
+  rm -r /var/log/thingsplex/bose/ || true
+  rm -r /opt/thingsplex/bose/data/ || true
 fi

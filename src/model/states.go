@@ -8,10 +8,10 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/thingsplex/bose/bose-api"
+	"github.com/futurehomeno/edge-bose-adapter/bose-api"
 
+	"github.com/futurehomeno/edge-bose-adapter/utils"
 	log "github.com/sirupsen/logrus"
-	"github.com/thingsplex/bose/utils"
 )
 
 type States struct {

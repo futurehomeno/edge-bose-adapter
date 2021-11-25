@@ -3,7 +3,7 @@ package model
 import (
 	"fmt"
 
-	"github.com/thingsplex/bose/bose-api"
+	"github.com/futurehomeno/edge-bose-adapter/bose-api"
 
 	"github.com/futurehomeno/fimpgo/fimptype"
 )
